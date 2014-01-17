@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+
+if (! -e '.git') {
+	print "Not a git repo\n";
+	exit(0);
+}
+
+
+my $pcnt = scalar @ARGV;
+
+
+my $cur_branch = 'XXX';
+my $from_branch = 'XXX';
+my $to_branch = 'XXX';
+
+my $branches = {};
+
+my $output = `git branch 2>&1`;
+foreach my $line (split /\n/, $output) {
+	my $brName = $line;
+	$brName =~ s/^[\s\*]+(.+?)\s*$/$1/gi;
+	$branches->{$brName} = $brName;
+	if ($line =~ m/\s*\*\s*(.+?)$/) {
+		$cur_branch = $1;
+	}
+}
+
+if ($pcnt < 1) {
+	die "No branch specified\n";
+} elsif ($pcnt == 1) {
+	$from_branch = $cur_branch;
+	$to_branch = $ARGV[0];
+	
+	
+} else {
+	$from_branch = $ARGV[0];
+	$to_branch = $ARGV[1];
+}
+
+if (!$branches->{$from_branch}) {
+	die "From branch:$from_branch doesn't exist\n";
+}
+if (!$branches->{$to_branch}) {
+	die "To branch:$to_branch doesn't exist\n";
+}
+
+print "Merging branch:$from_branch into branch:$to_branch\n\n";
+
+my $cmd;
+my $resp;
+$cmd = "git checkout $to_branch";
+print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
+$cmd = "git merge --no-ff --no-edit $from_branch";
+print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
+$cmd = "git push";
+print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
+$cmd = "git checkout $cur_branch";
+print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
+exit(0);
