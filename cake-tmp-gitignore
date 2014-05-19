@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Based on: http://stackoverflow.com/questions/2218075/using-git-with-your-cakephp-project
+ 
+# Procedure:
+# 1. Remove app/tmp/ from .gitignore
+# 2. touch app/tmp/.keep
+# 3. git add app/tmp/.keep
+# 4. git commit
+# 5. Add app/tmp/ to .gitignore
+ 
+# Clean tmpfiles and delete .gitignore
+rm .gitignore
+rm -rf app/tmp
+ 
+# Set up directories
+mkdir -p app/tmp/cache/models
+mkdir -p app/tmp/cache/persistent
+mkdir -p app/tmp/cache/views
+mkdir -p app/tmp/logs
+mkdir -p app/tmp/sessions
+mkdir -p app/tmp/tests
+ 
+# Make the directories itself writeable
+chmod -R 777 app/tmp
+ 
+# Add .keep files to the directories
+touch app/tmp/cache/models/.keep
+touch app/tmp/cache/persistent/.keep
+touch app/tmp/cache/views/.keep
+touch app/tmp/logs/.keep
+touch app/tmp/sessions/.keep
+touch app/tmp/tests/.keep
+ 
+# Add all files to stage
+git add app/tmp/*
+ 
+# Commit the changes
+git commit -m "Set up tmp dirs"
+ 
+# Add app/tmp/* to gitignore
+echo "app/tmp/*" > .gitignore
+ 
+# done!
