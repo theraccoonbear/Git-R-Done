@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use GitRDone;
+use GitRDone::Branches;
+
+
+#git format-patch master --stdout | git apply --check -
+
