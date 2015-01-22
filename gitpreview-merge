@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+use strict;
+#use warnings;
+use Data::Dumper;
+
+# git format-patch master --stdout | git-apply --check -
+
+if (scalar @ARGV < 1) {
+	print "Usage:\n  gitpreview-merge <target-branch>\n\n";
+	exit(0);
+}
+
+my $merge_to_branch = $ARGV[0];
+
+sub allBranches {
+	my @output = split(/\n/, `git branch -a`);
+	
+	my $branches = {
+		map {
+			my $v = defined $_ ? $_ :  '';
+			my @ret;
+			if ($v ne '') {
+				chomp($v);
+				$v =~ m/^\s*(?<active>\*)?\s*(?<branch>[^\s]+)(\s+->\s+([^\s]+?<tracking>)\s*)?$/;
+				my $active = defined $+{active} && $+{active} eq '*';
+				my $tracking = defined $+{tracking} ? $+{tracking} : '';
+				@ret = ($+{branch} => {
+					active => $active,
+					tracking => $tracking
+				});
+			} else {
+				@ret = ();
+			}
+			
+			@ret;
+		} map {
+			my $r = defined $_ ? $_ : '';
+		} @output
+	}; # $branches
+	
+	return $branches;
+}
+
+sub activeBranch {
+	my $branches = allBranches();
+	my $active = '';
+	
+	foreach my $branch (sort keys %$branches) {
+		if ($branches->{$branch}->{active}) {
+			$active = $branch;
+			last;
+		}
+	}
+	return $active;
+}
+
+my $all_branches = allBranches();
+my $merge_from_branch = activeBranch();
+
+if (! defined $all_branches->{$merge_to_branch}) {
+	print "$merge_to_branch is not a valid branch to merge into.\n\n";
+}
+
+my $patch_file = '/tmp/gitpreview-merge_patch';
+
+print "Generating patch from branch:$merge_from_branch to branch:$merge_to_branch...\n";
+`git format-patch $merge_to_branch --stdout > $patch_file`;
+print "OK.\n";
+print "Testing patch...\n";
+`git checkout $merge_to_branch 2>&1`;
+my $status = `git apply --check --verbose $patch_file 2>&1`;
+`git checkout $merge_from_branch 2>&1`;
+print "OK.  Conflicts...\n";
+print $status ? $status : "No Conflicts!";
+print "\n";
+

@@ -1,2 +1,2 @@
 #!/bin/bash
-git log | grep -B 5 -i "Merge branch 'hotfix-[0-9.]*'$"
+git log | grep -B 5 -i "Merge branch 'hotfix-"

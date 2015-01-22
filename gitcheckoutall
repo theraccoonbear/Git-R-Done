@@ -1,0 +1,74 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Data::Dumper;
+
+#$VAR1 = [
+#    {
+#            'active' => 1,
+#            'name' => 'master'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/HEAD -> origin/master'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/dan-develop'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/develop'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/don-develop'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/feature-backend'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/feature-file-tree'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/making-static'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/master'
+#    },
+#    {
+#            'active' => 0,
+#            'name' => 'remotes/origin/staging'
+#    }
+#];
+
+my $raw_branches = [split(/\n/, `git branch -a`)];
+my $branches = [];
+
+sub trim {
+    my $s = shift @_;
+    $s =~ s/^\s+//;
+    $s =~ s/\s+$//;
+    return $s;
+}
+
+foreach my $branch (@$raw_branches) {
+    $branch = trim($branch);
+    my $active = 0;
+    my $local = 0;
+    if ($branch =~ s/\*\s+//) {
+	$active = 1;
+    }
+
+    push @$branches, {name => $branch, active => $active};
+}
+print Dumper($branches);
+
+#for remote in `git branch -r`; do 
+#    echo $remote;
+#    git branch --track ${remote#origin/} $remote; 
+#done
