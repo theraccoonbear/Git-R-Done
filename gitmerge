@@ -53,6 +53,8 @@ my $cmd;
 my $resp;
 $cmd = "git checkout $to_branch";
 print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
+$cmd = "git pull";
+print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
 $cmd = "git merge --no-ff --no-edit $from_branch";
 print "$cmd\n"; $resp = `$cmd`; print "$resp\n\n";
 $cmd = "git push";

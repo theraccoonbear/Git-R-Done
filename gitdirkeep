@@ -1,0 +1,62 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Data::Dumper;
+
+my $cwd = `pwd`;
+chomp($cwd);
+$cwd .= '/';
+my $dir = scalar @ARGV < 1 ? $cwd : ($cwd . $ARGV[0]);
+
+chomp($dir);
+
+sub usage {
+	print <<__USAGE;
+Usage:
+	gitdirkeep <directory>
+	
+	
+__USAGE
+}
+
+sub keepDir {
+	my $dir = shift @_;
+	if ($dir !~ m/\/$/) {
+		$dir .= '/';
+	}
+	
+	print "Keeping: $dir\n";
+	my $keep_file = $dir . 'empty';
+	open (KFH, ">$keep_file") or die "Can't write $keep_file: $!";
+	close KFH;
+	
+	opendir DFH, $dir;
+	my @FILES = map { ! -d $dir . $_ ? () : $dir . $_ } grep ! /^\.{1,2}$/, readdir DFH;
+	closedir DFH;
+	
+	foreach my $child_dir (@FILES) {		
+		keepDir($child_dir);
+	}	
+}
+
+sub addDir {
+	my $dir = shift @_;
+	if ($dir !~ m/\/$/) {
+		$dir .= '/';
+	}
+	
+	`git add $dir`;
+	
+	open(GIFH, ">>" . $dir . ".gitignore") or die "Can't write git ignore: $!";
+	print GIFH "!empty";
+	close GIFH
+}
+
+if (! -d $dir) {
+	usage();
+	exit(0);
+}
+
+keepDir($dir);
+addDir($dir);
+
