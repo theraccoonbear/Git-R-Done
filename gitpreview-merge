@@ -1,7 +1,9 @@
 #!/usr/bin/perl
 use strict;
-#use warnings;
+use warnings;
 use Data::Dumper;
+
+# link-me
 
 # git format-patch master --stdout | git-apply --check -
 

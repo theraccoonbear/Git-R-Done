@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Data::Printer;
+use Getopt::Long;
+use Cwd;
+
+my $cur_dir = getcwd() . '/';
+
+my $link_dir = File::HomeDir->my_home . "/bin/";
+GetOptions ("path=s"   => \$link_dir) or die("Error in command line arguments\n");
+
+if (! $link_dir =~ m/\/$/) {
+    $link_dir .= '/';
+}
+
+
+if (! -d $link_dir) {
+    print "Invalid directory: $link_dir\n";
+    exit(0);
+}
+
+
+my $files = [split(/\n/, `grep -l link-me * 2> /dev/null | grep -v lnscripts`)];
+
+foreach my $f (@$files) {
+    my $ln_path = $link_dir . $f;
+    my $real_path = $cur_dir . $f;
+    if (! -e $ln_path) {
+        `ln -s $real_path $ln_path`;
+    }   
+}

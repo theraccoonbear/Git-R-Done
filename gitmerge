@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 
+# link-me
 
 if (! -e '.git') {
 	print "Not a git repo\n";
