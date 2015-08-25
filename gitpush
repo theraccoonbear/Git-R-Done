@@ -62,7 +62,7 @@ if ($repo =~ m/fatal/i) {
       $json = decode_json($raw);
    }
    
-   my $tmpl = drill($json, 'commit.template', '{{commit.message}}');
+   my $tmpl = drill($json, 'commit.template', '{{#commit}}{{message}}{{/commit}}');
    my $data = {
       branch => { name => $branch },
       commit => { message => $msg }
