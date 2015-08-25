@@ -1,10 +1,75 @@
-# link-me
-if [ $# -lt 1 ]; then
-   echo "Please enter a commit message"
-   exit 0
-fi
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use File::Slurp;
+use Data::Printer;
+use JSON::XS;
+use Cwd 'abs_path';
+use Template::Mustache;
 
-git add --all :/
-git commit -m "$1"
-git pull
-git push -u
+my $gsp = abs_path($0);
+$gsp =~ s/\/[^\/]+$/\//;
+
+my $git_push = $gsp . 'gitpush.sh';
+
+my $repo = `git rev-parse --show-toplevel 2>/dev/null`;
+chomp($repo);
+
+my $must = new Template::Mustache();
+
+sub drill {
+   my $obj = shift @_;
+   my $keys = [split(/\./, shift @_ || ())];
+   my $def = shift @_ || '';
+   
+   foreach my $k (@$keys) {
+      if (defined $obj->{$k}) {
+         $obj = $obj->{$k};
+      } else {
+         return $def;
+      }
+   }
+   
+   return $obj;
+}
+
+
+if ($repo =~ m/fatal/i) {
+   die "Sorry, not a repo.\n";
+} elsif (! -d $repo) {
+   die "Sorry, not a repo.\n";
+} else {
+   $repo .= '/';
+   
+   my $branches = [split(/\n/, `git branch`)];
+   my $branch = undef;
+   foreach my $b (@$branches) {
+      if ($b =~ m/^\*\s+(?<name>.+)$/) {
+         $branch = $+{name};
+      }
+   }
+   
+   if (! $branch) {
+      die "Couldn't identify branch";
+   }
+   
+   my $msg = $ARGV[0] || 'My commit message';
+   
+   my $config_path = $repo . '.git-config';
+   my $json = {};
+   if (-f $config_path) {
+      my $raw = read_file($config_path);
+      $json = decode_json($raw);
+   }
+   
+   my $tmpl = drill($json, 'commit.template', '{{commit.message}}');
+   my $data = {
+      branch => { name => $branch },
+      commit => { message => $msg }
+   };
+   
+   $msg = $must->render($tmpl, $data);
+
+   
+   print `$git_push '$msg'`;
+}
