@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Data::Printer;
 use Getopt::Long;
+use File::Slurp;
 use Cwd;
 
 my $cur_dir = getcwd() . '/';
@@ -26,7 +27,16 @@ my $files = [split(/\n/, `grep -l link-me * 2> /dev/null | grep -v lnscripts`)];
 foreach my $f (@$files) {
     my $ln_path = $link_dir . $f;
     my $real_path = $cur_dir . $f;
+
+    my $script = read_file($real_path);
+    if ($script =~ m/link-me:\s*(?<name>[^\s]+)$/gism) {
+        $ln_path = $link_dir . $+{name};
+    }
+    
+    
+    
     if (! -e $ln_path) {
+        print "ln -s $real_path $ln_path\n";
         `ln -s $real_path $ln_path`;
     }   
 }
