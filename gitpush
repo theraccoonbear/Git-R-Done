@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# link-me: gitpush
 use strict;
 use warnings;
 use File::Slurp;
@@ -70,6 +71,5 @@ if ($repo =~ m/fatal/i) {
    
    $msg = $must->render($tmpl, $data);
 
-   
    print `$git_push '$msg'`;
 }

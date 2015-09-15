@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
+use Data::Printer;
 
 # link-me
 
@@ -16,7 +17,6 @@ my $merge_to_branch = $ARGV[0];
 
 sub allBranches {
 	my @output = split(/\n/, `git branch -a`);
-	
 	my $branches = {
 		map {
 			my $v = defined $_ ? $_ :  '';
@@ -35,8 +35,6 @@ sub allBranches {
 			}
 			
 			@ret;
-		} map {
-			my $r = defined $_ ? $_ : '';
 		} @output
 	}; # $branches
 	

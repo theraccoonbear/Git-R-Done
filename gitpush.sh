@@ -1,4 +1,3 @@
-# link-me: gitpush
 if [ $# -lt 1 ]; then
    echo "Please enter a commit message"
    exit 0
