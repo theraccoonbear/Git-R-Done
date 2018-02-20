@@ -3,6 +3,8 @@ if [ $# -lt 1 ]; then
    exit 0
 fi
 
+echo $1
+
 git add --all :/
 git commit -m "$1"
 git pull

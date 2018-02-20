@@ -6,7 +6,11 @@ use File::Slurp;
 use Data::Printer;
 use JSON::XS;
 use Cwd 'abs_path';
-use Template::Mustache;
+use Text::Handlebars;
+
+my $msg = $ARGV[0];
+# ? $ARGV[0] : 'My commit message';
+p($msg);
 
 my $gsp = abs_path($0);
 $gsp =~ s/\/[^\/]+$/\//;
@@ -16,7 +20,7 @@ my $git_push = $gsp . 'gitpush.sh';
 my $repo = `git rev-parse --show-toplevel 2>/dev/null`;
 chomp($repo);
 
-my $must = new Template::Mustache();
+my $hbs = Text::Handlebars->new();
 
 sub drill {
    my $obj = shift @_;
@@ -54,8 +58,6 @@ if ($repo =~ m/fatal/i) {
       die "Couldn't identify branch";
    }
    
-   my $msg = $ARGV[0] || 'My commit message';
-   
    my $config_path = $repo . '.git-config';
    my $json = {};
    if (-f $config_path) {
@@ -68,8 +70,10 @@ if ($repo =~ m/fatal/i) {
       branch => { name => $branch },
       commit => { message => $msg }
    };
-   
-   $msg = $must->render($tmpl, $data);
 
+   p($tmpl);
+   p($data);
+   
+   $msg = $hbs->render_string($tmpl, $data);
    print `$git_push '$msg'`;
 }
