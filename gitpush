@@ -8,9 +8,7 @@ use JSON::XS;
 use Cwd 'abs_path';
 use Text::Handlebars;
 
-my $msg = $ARGV[0];
-# ? $ARGV[0] : 'My commit message';
-p($msg);
+my $msg = $ARGV[0] || 'My commit message';
 
 my $gsp = abs_path($0);
 $gsp =~ s/\/[^\/]+$/\//;
@@ -71,9 +69,6 @@ if ($repo =~ m/fatal/i) {
       commit => { message => $msg }
    };
 
-   p($tmpl);
-   p($data);
-   
    $msg = $hbs->render_string($tmpl, $data);
    print `$git_push '$msg'`;
 }
